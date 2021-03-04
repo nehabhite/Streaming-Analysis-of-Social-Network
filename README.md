@@ -1,5 +1,6 @@
 # Streaming-Analysis-of-Social-Network
 Streaming Analysis of Social Network using Advance Database methods
+
 Data is the new oil. Data is being collected at Data warehouses across the world to extract
 meaningful information. However, to process and store huge volume of data is a complicated
 process as data can be in different format and size. We need a system to process the data
