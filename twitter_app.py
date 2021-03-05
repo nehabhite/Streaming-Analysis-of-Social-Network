@@ -3,7 +3,7 @@ import sys
 import requests
 import requests_oauthlib
 import json
-
+from json.decoder import JSONDecodeError
 ACCESS_TOKEN = '137438589-H3540VwUJB4Ia8MSjoOinISV9oVeOjq2VDyEoGUQ'
 ACCESS_SECRET = 'MFK6NDBHDis1GFDAXc6cDmfmV0pqq8eYa5muyAPkdEN2O'
 CONSUMER_KEY = 'MsR0xzen9YvoA8XDA1eJVdufy'
@@ -20,6 +20,9 @@ def send_tweets_to_spark(http_resp, tcp_connection):
             print("Tweet Text: " + tweet_text)
             print ("------------------------------------------")
             tcp_connection.send(tweet_text + '\n')
+        except JSONDecodeError as e:
+            e = sys.exc_info()[0]
+            print("Error: %s" % e)
         except:
             e = sys.exc_info()[0]
             print("Error: %s" % e)
@@ -28,12 +31,11 @@ def send_tweets_to_spark(http_resp, tcp_connection):
 def get_tweets():
     url = 'https://github.com/nehabhite/Streaming-Analysis-of-Social-Network/blob/main/filter.json'
     #query_data = [('language', 'en'), ('locations', '-130,-20,100,50'),('track','#')]
-    query_data = [(locations', '-122.75,36.8,-121.75,37.8,-74,40,-73,41'), ('track', '#')] #this location value is San Francisco & NYC
+    query_data = [('locations', '-122.75,36.8,-121.75,37.8,-74,40,-73,41'), ('track','#')]  #this location value is San Francisco & NYC
     query_url = url + '?' + '&'.join([str(t[0]) + '=' + str(t[1]) for t in query_data])
     response = requests.get(query_url, auth=my_auth, stream=True)
     print(query_url, response)
     return response
-
 
 TCP_IP = "localhost"
 TCP_PORT = 9009
@@ -46,6 +48,3 @@ conn, addr = s.accept()
 print("Connected... Starting getting tweets.")
 resp = get_tweets()
 send_tweets_to_spark(resp,conn)
-
-
-
