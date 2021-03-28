@@ -21,10 +21,6 @@ def get_geo_data(tweet):
 
 def get_user_location(tweet):
 
-    '''Function that extracts location of the user / author of each tweet,
-       which comes in as a JSON string.
-    '''
-
     user_location = []
     if tweet['user']['location'] != None:
         try:
@@ -36,10 +32,6 @@ def get_user_location(tweet):
 
 def get_hashtags(tweet):
 
-    '''Function that extracts the hashtags from each tweet,
-       which comes in as a JSON string.
-    '''
-
     hashtags = []
     if 'extended_tweet' in tweet:
         for hashtag in tweet['extended_tweet']['entities']['hashtags']:
@@ -50,11 +42,6 @@ def get_hashtags(tweet):
     return hashtags
 
 def get_tweet_dict(tweet):
-
-    '''Function that extracts relevant information from the tweet
-       (using the 3 user-defined functions from above) and structures the
-       data into a dictionary -- in preparation for loading into MongoDB.
-    '''
 
     if 'extended_tweet' in tweet:
         text = tweet['extended_tweet']['full_text']
@@ -83,23 +70,13 @@ def get_tweet_dict(tweet):
 
 class TwitterAuthenticator():
 
-    """Class, whose sole purpose is to provide authentication to use
-       the Twitter API.
-    """
     def authenticate(self):
-        """
-        Use tweepy's built-in OAuthHandler class to return authentication object.
-        """
         auth = OAuthHandler(globals.CONSUMER_API_KEY, globals.CONSUMER_API_SECRET)
         auth.set_access_token(globals.ACCESS_TOKEN, globals.ACCESS_TOKEN_SECRET)
         return auth
 
 class TwitterListener(StreamListener):
 
-    '''Required Class that inherits from tweepy.StreamListener.
-       The 'on_data()' method dictates what should be done with tweets
-       as soon as they come in contact with the Listener / program.
-    '''
 
     def __init__(self, limit, callback):
         super().__init__() # Inherit __init__ method from parent class.
@@ -109,27 +86,11 @@ class TwitterListener(StreamListener):
 
     def on_error(self, status):
 
-        '''DEFAULT method inherited from StreamListener class.
-           Kills the connection if rate-limiting occurs.
-           see: https://developer.twitter.com/en/docs/basics/response-codes
-        '''
-
         if status == 420:
             return 420
         print(status)
 
     def on_data(self, data):
-
-        '''DEFAULT method inherited from StreamListener class.
-           This is the main function of the Twitter Streamer class.
-           It defines what should be done with each incoming streamed tweet as it
-           is intercepted by the StreamListener:
-           - convert each json-like string from twitter into a workable JSON object;
-           - ignore retweets, replies, and quoted tweets;
-           - apply the get_tweet_dict function to each object;
-           - apply a callback function to the resulting dictionary;
-           - shut off StreamListener as soon as it reaches a pre-defined limit.
-        '''
 
         t = json.loads(data)
 
@@ -147,18 +108,12 @@ class TwitterListener(StreamListener):
                 return False
 
 class TwitterStreamer():
-    '''
-       Class containing the primary method / functionality of the script.
-    '''
 
     def __init__(self, keywords):
         self.twitter_authenticator = TwitterAuthenticator()
         self.keywords = keywords
 
     def stream_tweets(self, limit, callback):
-        '''
-            Primary function that wraps up all preceeding code into one method.
-        '''
         listener = TwitterListener(limit, callback)
         auth = self.twitter_authenticator.authenticate()
         stream = Stream(auth, listener)
@@ -167,6 +122,6 @@ class TwitterStreamer():
 
 if __name__ == "__main__":
 
-    twitter_streamer = TwitterStreamer(['berlin'])
+    twitter_streamer = TwitterStreamer(['covid'])
     twitter_streamer.stream_tweets(10, print)
 
