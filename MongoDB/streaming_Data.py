@@ -8,7 +8,6 @@ import globals
 LANGUAGES = ['en']
 
 def get_geo_data(tweet):
-
     geo_data = []
     if tweet['place'] != None:
         try:
